@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="GrowingArray/GrowingArray.csproj" />
+  <Project Path="GrowingArray.Tests/GrowingArray.Tests.csproj" />
+</Solution>
