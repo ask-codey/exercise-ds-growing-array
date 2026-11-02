@@ -1,5 +1,7 @@
 # The tests for your playlist. You don't need to change this file.
 # Each message says what was expected, so a failing test tells you what to look at.
+import time
+
 import pytest
 
 from growing_array import Playlist
@@ -92,10 +94,15 @@ def test_remove_at_refuses_an_index_with_no_song():
         playlist.remove_at(0)  # Not yet: an empty playlist has nothing to remove.
 
 
-def test_a_thousand_songs():
+def test_a_million_songs_stay_fast():
     playlist = Playlist()
-    for i in range(1000):
+    started = time.perf_counter()
+    for i in range(1000000):
         playlist.add(f"Song {i}")
-    assert playlist.count == 1000, "Not yet: 1,000 songs were added."
-    assert playlist.capacity == 1024, "Not yet: doubling from 2 gives 1,024 slots for 1,000 songs."
-    assert playlist.get(999) == "Song 999", "Not yet: the last song is at index 999."
+        if i % 10000 == 0 and time.perf_counter() - started > 2:
+            break
+    seconds = time.perf_counter() - started
+    assert seconds < 2, f"Not yet: adding 1,000,000 songs ran past 2 seconds: it was stopped at {seconds:.1f} seconds, with {playlist.count} songs added. When moving day is rare, a million adds take well under one second."
+    assert playlist.count == 1000000, "Not yet: 1,000,000 songs were added."
+    assert playlist.get(0) == "Song 0", "Not yet: the first song is at index 0."
+    assert playlist.get(999999) == "Song 999999", "Not yet: the last song is at index 999,999."

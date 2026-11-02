@@ -1,5 +1,6 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,13 +104,19 @@ class PlaylistTest {
     }
 
     @Test
-    void aThousandSongs() {
+    void aMillionSongsStayFast() {
         Playlist playlist = new Playlist();
-        for (int i = 0; i < 1000; i++) {
+        long started = System.nanoTime();
+        for (int i = 0; i < 1000000; i++) {
             playlist.add("Song " + i);
+            if (i % 10000 == 0 && System.nanoTime() - started > 2_000_000_000L) {
+                break;
+            }
         }
-        assertEquals(1000, playlist.count(), "Not yet: 1,000 songs were added.");
-        assertEquals(1024, playlist.capacity(), "Not yet: doubling from 2 gives 1,024 slots for 1,000 songs.");
-        assertEquals("Song 999", playlist.get(999), "Not yet: the last song is at index 999.");
+        double seconds = (System.nanoTime() - started) / 1e9;
+        assertTrue(seconds < 2, "Not yet: adding 1,000,000 songs ran past 2 seconds: it was stopped at %.1f seconds, with %d songs added. When moving day is rare, a million adds take well under one second.".formatted(seconds, playlist.count()));
+        assertEquals(1000000, playlist.count(), "Not yet: 1,000,000 songs were added.");
+        assertEquals("Song 0", playlist.get(0), "Not yet: the first song is at index 0.");
+        assertEquals("Song 999999", playlist.get(999999), "Not yet: the last song is at index 999,999.");
     }
 }

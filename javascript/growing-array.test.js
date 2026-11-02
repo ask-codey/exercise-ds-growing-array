@@ -90,12 +90,18 @@ test("removeAt refuses an index with no song", () => {
   assert.throws(() => playlist.removeAt(0), RangeError, "Not yet: an empty playlist has nothing to remove.");
 });
 
-test("a thousand songs", () => {
+test("a million songs stay fast", () => {
   const playlist = new Playlist();
-  for (let i = 0; i < 1000; i++) {
+  const started = performance.now();
+  for (let i = 0; i < 1000000; i++) {
     playlist.add(`Song ${i}`);
+    if (i % 10000 === 0 && performance.now() - started > 2000) {
+      break;
+    }
   }
-  assert.equal(playlist.count, 1000, "Not yet: 1,000 songs were added.");
-  assert.equal(playlist.capacity, 1024, "Not yet: doubling from 2 gives 1,024 slots for 1,000 songs.");
-  assert.equal(playlist.get(999), "Song 999", "Not yet: the last song is at index 999.");
+  const seconds = (performance.now() - started) / 1000;
+  assert.ok(seconds < 2, `Not yet: adding 1,000,000 songs ran past 2 seconds: it was stopped at ${seconds.toFixed(1)} seconds, with ${playlist.count} songs added. When moving day is rare, a million adds take well under one second.`);
+  assert.equal(playlist.count, 1000000, "Not yet: 1,000,000 songs were added.");
+  assert.equal(playlist.get(0), "Song 0", "Not yet: the first song is at index 0.");
+  assert.equal(playlist.get(999999), "Song 999999", "Not yet: the last song is at index 999,999.");
 });

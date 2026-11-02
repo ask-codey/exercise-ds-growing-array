@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using GrowingArray;
 
 namespace GrowingArray.Tests;
@@ -115,15 +116,22 @@ public class PlaylistTests
     }
 
     [TestMethod]
-    public void AThousandSongs()
+    public void AMillionSongsStayFast()
     {
         Playlist playlist = new Playlist();
-        for (int i = 0; i < 1000; i++)
+        Stopwatch watch = Stopwatch.StartNew();
+        for (int i = 0; i < 1000000; i++)
         {
             playlist.Add("Song " + i);
+            if (i % 10000 == 0 && watch.Elapsed.TotalSeconds > 2)
+            {
+                break;
+            }
         }
-        Assert.AreEqual(1000, playlist.Count, "Not yet: 1,000 songs were added.");
-        Assert.AreEqual(1024, playlist.Capacity, "Not yet: doubling from 2 gives 1,024 slots for 1,000 songs.");
-        Assert.AreEqual("Song 999", playlist.Get(999), "Not yet: the last song is at index 999.");
+        watch.Stop();
+        Assert.IsTrue(watch.Elapsed.TotalSeconds < 2, "Not yet: adding 1,000,000 songs ran past 2 seconds: it was stopped at " + watch.Elapsed.TotalSeconds.ToString("0.0") + " seconds, with " + playlist.Count + " songs added. When moving day is rare, a million adds take well under one second.");
+        Assert.AreEqual(1000000, playlist.Count, "Not yet: 1,000,000 songs were added.");
+        Assert.AreEqual("Song 0", playlist.Get(0), "Not yet: the first song is at index 0.");
+        Assert.AreEqual("Song 999999", playlist.Get(999999), "Not yet: the last song is at index 999,999.");
     }
 }
